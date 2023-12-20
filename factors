@@ -1,35 +1,48 @@
-#!/usr/bin/env python3
+#!/usr/bin/env bash
+#is a challenge
+check_factor()
+{
+	if [ $# -ne 3 ];
+        then
+                args=("$@")
+                count=0
+                num2=1
+                for a in ${args[*]};
+                do
+                        if [ $count -gt 1 ];
+                        then
+                                num2=$(echo $a*$num2 | bc)
+                        fi
+                        count=$((count + 1))
+                done
+        else
+                num2=$3
+        fi
 
-import sys
+        num1=$2
+        num=$(echo "$1" | tr ':' '=')
 
+        result=$(echo "if($num2 > $num1) 1 else 0" | bc)
+	        if ((result == 1)); then
+		        numcp=$num1
+		        num1=$num2
+		        num2=$numcp
+                fi
 
-def factorize(number):
-    # This function returns a tuple of two factors of the number
-    # that are not necessarily prime.
-    for i in range(2, number):
-        if number % i == 0:
-            return (i, number // i)
-    return (1, number)
+        echo "$num$num1*$num2"
+}
 
+if [ $# -ne 1 ]
+then
+        echo 'Usage: rsa <file>'
+        exit 1
+else
 
-def main(file_name):
-    try:
-        with open(file_name, 'r') as file:
-            for line in file:
-                number = int(line.strip())
-                p, q = factorize(number)
-                print(f"{number}={p}*{q}")
-    except FileNotFoundError:
-        print(f"The file {file_name} was not found.")
-    except ValueError:
-        print("The file contains invalid numbers.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
+        while read i
+        do
 
+                result=$(factor "$i")
+                check_factor $result
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: factors <file>")
-    else:
-        main(sys.argv[1])
-
+        done < "$1"
+fi
